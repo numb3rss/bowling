@@ -14,16 +14,18 @@ namespace Bowling.Host.Timers
         private readonly IEventWaitHandle _eventWaitHandle;
         private readonly object _lock;
         private readonly IRequestHandler<string, Score> _getBowlerScoreUseCase;
+        private readonly IRequestHandler<Score, bool> _saveBowlerScoreUseCase;
 
-        public BowlingGameTimer(
-            int interval,
+        public BowlingGameTimer(int interval,
             ITimer timer,
-            IConsole console, 
-            IRequestHandler<string, Score> getBowlerScoreUseCase)
+            IConsole console,
+            IRequestHandler<string, Score> getBowlerScoreUseCase, 
+            IRequestHandler<Score, bool> saveBowlerScoreUseCase)
         {
             _timer = timer;
             _console = console;
             _getBowlerScoreUseCase = getBowlerScoreUseCase;
+            _saveBowlerScoreUseCase = saveBowlerScoreUseCase;
 
             _timer.Start(interval);
             _timer.Elapsed += TimerOnElapsed;
@@ -57,6 +59,7 @@ namespace Bowling.Host.Timers
                     var playerScore = _console.ReadLine();
                     var score = _getBowlerScoreUseCase.Handle(playerScore);
                     _console.WriteLine($"Bowler have a score equals to {score.Value}");
+                    _saveBowlerScoreUseCase.Handle(score);
                 }
 
                 Monitor.Exit(_lock);

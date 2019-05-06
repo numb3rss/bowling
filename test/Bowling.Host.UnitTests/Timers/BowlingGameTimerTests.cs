@@ -17,11 +17,13 @@ namespace Bowling.Host.UnitTests.Timers
         private readonly Mock<IConsole> _consoleMock;
         private readonly Mock<IEventWaitHandle> _eventWaitHandle;
         private readonly Mock<IRequestHandler<string, Score>> _getBowlerScoreUseCase;
+        private readonly Mock<IRequestHandler<Score, bool>> _saveBowlerScoreUseCase;
 
         public BowlingGameTimerTests()
         {
             _getBowlerScoreUseCase = new Mock<IRequestHandler<string, Score>>();
             _getBowlerScoreUseCase.Setup(g => g.Handle(It.IsAny<string>())).Returns(new Score(0));
+            _saveBowlerScoreUseCase = new Mock<IRequestHandler<Score, bool>>();
             _eventWaitHandle = new Mock<IEventWaitHandle>();
             _timerMock = new Mock<ITimer>();
             _consoleMock = new Mock<IConsole>();
@@ -29,7 +31,7 @@ namespace Bowling.Host.UnitTests.Timers
             BowlingContext.Current.EventWaitHandle = _eventWaitHandle.Object;
 
             new BowlingGameTimer(_interval, _timerMock.Object, _consoleMock.Object,
-                _getBowlerScoreUseCase.Object);
+                _getBowlerScoreUseCase.Object, _saveBowlerScoreUseCase.Object);
         }
 
         public void Dispose()
@@ -176,6 +178,27 @@ namespace Bowling.Host.UnitTests.Timers
 
             //Assert
             _consoleMock.Verify(c => c.WriteLine(displayMessageScore), Times.Once);
+        }
+
+        [Fact]
+        public void OnElapsedEvent_ShouldSaveBowlerScore_WhenCharPressedIsEqualS()
+        {
+            //Arrange
+            var playerScore = "X X X X X X X X X X";
+            _consoleMock
+                .SetupSequence(c => c.ReadLine())
+                .Returns("s")
+                .Returns(playerScore);
+            var score = new Score(1);
+            _getBowlerScoreUseCase
+                .Setup(g => g.Handle(It.IsAny<string>()))
+                .Returns(score);
+
+            //Act
+            _timerMock.Raise(t => t.Elapsed += null, new EventArgs() as ElapsedEventArgs);
+
+            //Assert
+            _saveBowlerScoreUseCase.Verify(s => s.Handle(score), Times.Once);
         }
     }
 }
