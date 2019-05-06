@@ -1,5 +1,7 @@
 ﻿using System.Threading;
 using System.Timers;
+using Bowling.Application.UseCases;
+using Bowling.Domain.Entities;
 using Bowling.Host.Ambient;
 using Bowling.Host.Wrappers;
 
@@ -11,11 +13,17 @@ namespace Bowling.Host.Timers
         private readonly ITimer _timer;
         private readonly IEventWaitHandle _eventWaitHandle;
         private readonly object _lock;
+        private readonly IRequestHandler<string, Score> _getBowlerScoreUseCase;
 
-        public BowlingGameTimer(int interval, ITimer timer, IConsole console)
+        public BowlingGameTimer(
+            int interval,
+            ITimer timer,
+            IConsole console, 
+            IRequestHandler<string, Score> getBowlerScoreUseCase)
         {
             _timer = timer;
             _console = console;
+            _getBowlerScoreUseCase = getBowlerScoreUseCase;
 
             _timer.Start(interval);
             _timer.Elapsed += TimerOnElapsed;
@@ -46,6 +54,9 @@ namespace Bowling.Host.Timers
                 else if (line.ToUpper() == "S")
                 {
                     _console.WriteLine("Please enter score.");
+                    var playerScore = _console.ReadLine();
+                    var score = _getBowlerScoreUseCase.Handle(playerScore);
+                    _console.WriteLine($"Bowler have a score equals to {score.Value}");
                 }
 
                 Monitor.Exit(_lock);

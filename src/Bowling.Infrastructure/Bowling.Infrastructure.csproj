@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.2" />
+    <PackageReference Include="Moq" Version="4.10.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Bowling.Application\Bowling.Application.csproj" />
     <ProjectReference Include="..\Bowling.Domain\Bowling.Domain.csproj" />
   </ItemGroup>

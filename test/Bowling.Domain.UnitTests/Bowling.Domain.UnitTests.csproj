@@ -16,8 +16,4 @@
     <ProjectReference Include="..\..\src\Bowling.Domain\Bowling.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Entities\" />
-  </ItemGroup>
-
 </Project>

@@ -2,6 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Bowling.Application;
+using Bowling.Application.UseCases;
+using Bowling.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using Bowling.Host.Ambient;
 using Bowling.Host.Timers;
@@ -25,7 +28,9 @@ namespace Bowling.Host
 
                 var console = scope.ServiceProvider.GetService<IConsole>();
                 var timer = scope.ServiceProvider.GetService<ITimer>();
-                var bowlingGameTimer = new BowlingGameTimer(2000, timer, console);
+                var getBowlerScoreUseCase = scope.ServiceProvider.GetService<IRequestHandler<string, Score>>();
+
+                var bowlingGameTimer = new BowlingGameTimer(2000, timer, console, getBowlerScoreUseCase);
 
                 bool signaled;
                 do
@@ -42,6 +47,7 @@ namespace Bowling.Host
             var builder = new ContainerBuilder();
 
             builder.RegisterModule(new BowlingHostModule());
+            builder.RegisterModule(new ApplicationModule());
 
             builder.Populate(new ServiceCollection());
             var appContainer = builder.Build();
