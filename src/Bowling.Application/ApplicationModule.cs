@@ -10,6 +10,7 @@ namespace Bowling.Application
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<GetBowlerScoreUseCase>().As<IRequestHandler<string, Score>>();
+            builder.RegisterType<SaveBowlerScoreUseCase>().As<IRequestHandler<Score, bool>>();
             builder.RegisterType<CalculateScoreService>().As<ICalculateScoreService>();
         }
     }
